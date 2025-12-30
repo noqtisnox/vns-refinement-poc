@@ -11,7 +11,7 @@ const BottomNavbar: React.FC = () => {
           <a href="#" className={styles.taskLink}>Завдання: Лабораторна робота №1</a>
           <span className="edit-icon">✎</span>
         </div>
-        <a href="#" className={styles.viewAll}>Переглянути всі роботи</a>
+        <a href="http://localhost:8000/mod/assign/view.php?id=12345&action=grading" className={styles.viewAll}>Переглянути всі роботи</a>
       </div>
 
       {/* Right Section */}
