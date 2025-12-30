@@ -1,0 +1,32 @@
+.grading-page {
+    height: calc(100vh - 40px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 0; /* padding handled inline in component */
+}
+
+.grading-page > div:first-child {
+    height: 100%;
+}
+
+.grading-page aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    overflow: auto;
+}
+
+.grading-page aside > * {
+    width: 100%;
+}
+
+.grading-page aside .student-info-card {
+    flex: 0 0 auto;
+}
+
+.grading-page aside .grading-form {
+    flex: 1 1 auto;
+    overflow: auto;
+}

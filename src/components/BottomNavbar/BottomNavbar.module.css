@@ -1,0 +1,92 @@
+.bottomNavbar {
+  margin-top: 16px;
+  
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  padding: 12px 24px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  z-index: 1000;
+}
+
+.navLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navLeft a {
+  text-decoration: none;
+  color: #0077cc;
+  font-size: 14px;
+}
+
+.navLeft a:hover {
+  text-decoration: underline;
+}
+
+.viewAll {
+  font-size: 12px !important;
+}
+
+/* Right Section Styles */
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.studentSelector {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.studentDropdown {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 4px 8px;
+  background: transparent;
+  color: #555;
+}
+
+.navArrow {
+  background: none;
+  border: none;
+  color: #0077cc;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.statsGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #0077cc;
+}
+
+.resetBtn {
+  background: none;
+  border: none;
+  color: #0077cc;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.resetBtn:hover {
+  text-decoration: underline;
+}

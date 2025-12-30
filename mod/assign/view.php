@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Assignment Management</title>
+    <link rel="stylesheet" href="/mod/assign/dist/assets/main.css">
     <script type="module" src="/mod/assign/dist/assets/main.js"></script>
 </head>
 <body>
