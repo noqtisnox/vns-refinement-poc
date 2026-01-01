@@ -29,7 +29,7 @@ const StudentInfo: React.FC<Props> = ({ data }) => {
 
       <div className="details-grid">
         <div className="detail-item">
-          <p className="detail-label">Submission Status</p>
+          <p className="detail-label">Статус здачі</p>
           <span className={statusClass}>
             {submissionStatus.charAt(0).toUpperCase() +
               submissionStatus.slice(1)}
@@ -37,12 +37,12 @@ const StudentInfo: React.FC<Props> = ({ data }) => {
         </div>
 
         <div className="detail-item">
-          <p className="detail-label">Last Updated</p>
+          <p className="detail-label">Оновлено роботу</p>
           <p className="detail-value">{lastUpdated}</p>
         </div>
 
         <div className="detail-item">
-          <p className="detail-label">Current Grade</p>
+          <p className="detail-label">Поточна оцінка</p>
           <p className="detail-grade">{currentGrade}</p>
         </div>
       </div>

@@ -25,11 +25,12 @@ const AssignmentViewer: React.FC<Props> = ({ assignmentUrl }) => {
         className='pdf-display-area'
         style={{ maxWidth: `${MAX_PDF_WIDTH}px`, height: '90vh' }} 
       >
-        <embed 
-          src={assignmentUrl} 
-          type='application/pdf'
+        <iframe 
+          src={assignmentUrl}
+          title='Assignment PDF Viewer'
           className='pdf-embed'
-        />
+        >
+        </iframe>
       </div>
     </div>
   );

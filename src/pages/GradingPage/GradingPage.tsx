@@ -5,7 +5,7 @@ import type { StudentDetails } from '../../types/types';
 import AssignmentViewer from '../../components/AssignmentViewer/AssignmentViewer';
 import testPdf from '../../assets/pdf/test-pdf.pdf';
 import GradingForm from '../../components/GradingForm/GradingForm';
-import BottomNavbar from '../../components/BottomNavbar/BottomNavbar';
+import AssignmentNavbar from '../../components/AssignmentNavbar/AssignmentNavbar';
 
 const GradingPage: React.FC = () => {
   const params = new URLSearchParams(window.location.search);
@@ -14,24 +14,26 @@ const GradingPage: React.FC = () => {
 
   const student: StudentDetails = {
     id: userId || '0',
-    name: 'Student Name',
+    name: 'Мавко Уляна',
     email: 'student@example.com',
-    pfpUrl: '',
+    pfpUrl: 'https://i0.wp.com/newspack-berkeleyside-cityside.s3.amazonaws.com/wp-content/uploads/2018/10/unnamed-1.jpg?resize=780%2C437&ssl=1',
     submissionStatus: 'submitted',
-    lastUpdated: 'Unknown',
-    currentGrade: '—',
+    lastUpdated: '10 жовтня 2025, 17:15 PM',
+    currentGrade: '5.00',
   };
 
   const assignmentUrl = testPdf;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', }}>
-      <StudentInfo data={student} />
+      <AssignmentNavbar />
       <div style={{ flex: 1, display: 'flex', justifyContent: 'space-evenly' }}>
         <AssignmentViewer assignmentUrl={assignmentUrl} />
-        <GradingForm />
+        <div style={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+          <StudentInfo data={student} />
+          <GradingForm />
+        </div>
       </div>
-      <BottomNavbar />
     </div>
   );
 };

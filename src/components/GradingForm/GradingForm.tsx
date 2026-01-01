@@ -14,24 +14,24 @@ const GradingForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="grading-form">
       {" "}
-      <h2 className="form-title">Grade Submission</h2>
+      <h2 className="form-title">Оцінка роботи</h2>
       <div className="form-group">
         <label htmlFor="grade" className="form-label">
-          Grade:
+          Оцінка:
         </label>
         <input
           id="grade"
           type="text"
           value={grade}
           onChange={(e) => setGrade(e.target.value)}
-          placeholder="Enter the grade..."
+          placeholder="5.0"
           className="text-input grade-input"
           required
         />
       </div>
       <div className="form-group">
         <label htmlFor="comment" className="form-label">
-          Comment:
+          Відгук коментарем:
         </label>
 
         {/* <div className="markdown-toolbar">
@@ -50,23 +50,23 @@ const GradingForm: React.FC = () => {
           id="comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Leave a comment about the assignment (e.g., use **bold** or *italics*)..."
+          placeholder="..."
           rows={6}
           className="textarea-input"
         />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button type="submit" className="submit-button">
-            Save
+            Зберегти
           </button>
           <button type="submit" className="submit-button">
-            Save & Next
+            Зберегти та наступний
           </button>
       </div>
 
       <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <input type="checkbox" id="notify" name="notify" value="notify" />
-        <label htmlFor="notify">Notify the student</label>
+        <label htmlFor="notify">Повідомити студента</label>
       </div>
     </form>
   );
