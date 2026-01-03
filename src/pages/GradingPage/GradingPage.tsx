@@ -9,17 +9,43 @@ import AssignmentNavbar from '../../components/AssignmentNavbar/AssignmentNavbar
 
 const GradingPage: React.FC = () => {
   const params = new URLSearchParams(window.location.search);
-  // const assignmentId = params.get('id') ?? '';
+  const assignmentId = params.get('id') ?? '';
   const userId = params.get('userid') ?? '';
+  const nameParam = params.get('name') ?? '';
+  const emailParam = params.get('email') ?? '';
+  const gradeParam = params.get('grade') ?? '';
+  const statusParam = (params.get('status') as
+    | 'none'
+    | 'submitted'
+    | 'late'
+    | 'graded') || 'submitted';
+  const lastUpdatedParam = params.get('lastUpdated') ?? new Date().toLocaleString();
+
+  // Try to read stored participant data from sessionStorage. This avoids passing extra fields via URL.
+  let storedParticipant: any = null;
+  try {
+    const key = `grading:${assignmentId}:${userId}`;
+    const raw = sessionStorage.getItem(key);
+    if (raw) storedParticipant = JSON.parse(raw);
+  } catch (err) {
+    storedParticipant = null;
+  }
 
   const student: StudentDetails = {
     id: userId || '0',
-    name: 'Мавко Уляна',
-    email: 'student@example.com',
-    pfpUrl: 'https://i0.wp.com/newspack-berkeleyside-cityside.s3.amazonaws.com/wp-content/uploads/2018/10/unnamed-1.jpg?resize=780%2C437&ssl=1',
-    submissionStatus: 'submitted',
-    lastUpdated: '10 жовтня 2025, 17:15 PM',
-    currentGrade: '5.00',
+    name: storedParticipant?.fullname || nameParam || 'Unknown Student',
+    email: storedParticipant?.email || emailParam || 'student@example.com',
+    pfpUrl:
+      storedParticipant?.pfpUrl ||
+      params.get('pfpUrl') ||
+      'https://i0.wp.com/newspack-berkeleyside-cityside.s3.amazonaws.com/wp-content/uploads/2018/10/unnamed-1.jpg?resize=780%2C437&ssl=1',
+    submissionStatus: (storedParticipant?.submissionstatus as
+      | 'none'
+      | 'submitted'
+      | 'late'
+      | 'graded') || statusParam,
+    lastUpdated: storedParticipant?.lastUpdated || lastUpdatedParam,
+    currentGrade: String(storedParticipant?.currentgrade ?? (gradeParam || 'N/A')),
   };
 
   const assignmentUrl = testPdf;

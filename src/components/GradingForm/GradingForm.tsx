@@ -1,74 +1,68 @@
 import React, { useState } from "react";
-import "./GradingForm.css";
+import { Box, TextField, Button, Checkbox, FormControlLabel, Typography, Stack } from "@mui/material";
 
 const GradingForm: React.FC = () => {
   const [grade, setGrade] = useState("");
   const [comment, setComment] = useState("");
+  const [notify, setNotify] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     console.log("Grade Submitted:", grade);
     console.log("Comment Submitted:", comment);
+    console.log("Notify:", notify);
+  };
+
+  const handleSaveNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSave();
+    // TODO: advance to next student
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grading-form">
-      {" "}
-      <h2 className="form-title">Оцінка роботи</h2>
-      <div className="form-group">
-        <label htmlFor="grade" className="form-label">
-          Оцінка:
-        </label>
-        <input
+    <Box component="form" onSubmit={handleSave} sx={{ p: 2, bgcolor: "background.paper", borderRadius: 1, boxShadow: 2, width: '100%' }}>
+      <Typography variant="h6" gutterBottom>
+        Оцінка роботи
+      </Typography>
+
+      <Stack spacing={2}>
+        <TextField
           id="grade"
-          type="text"
+          label="Оцінка"
           value={grade}
           onChange={(e) => setGrade(e.target.value)}
           placeholder="5.0"
-          className="text-input grade-input"
           required
+          size="small"
+          sx={{ width: { xs: '100%', sm: 200 } }}
         />
-      </div>
-      <div className="form-group">
-        <label htmlFor="comment" className="form-label">
-          Відгук коментарем:
-        </label>
 
-        {/* <div className="markdown-toolbar">
-          <button type="button" className="toolbar-button is-bold">
-            B
-          </button>
-          <button type="button" className="toolbar-button is-italic">
-            I
-          </button>
-          <button type="button" className="toolbar-button is-link">
-            🔗
-          </button>
-        </div> */}
-
-        <textarea
+        <TextField
           id="comment"
+          label="Відгук коментарем"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="..."
-          rows={6}
-          className="textarea-input"
+          multiline
+          minRows={6}
+          fullWidth
         />
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button type="submit" className="submit-button">
-            Зберегти
-          </button>
-          <button type="submit" className="submit-button">
-            Зберегти та наступний
-          </button>
-      </div>
 
-      <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <input type="checkbox" id="notify" name="notify" value="notify" />
-        <label htmlFor="notify">Повідомити студента</label>
-      </div>
-    </form>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button type="submit" variant="contained" color="primary" onClick={handleSave}>
+            Зберегти
+          </Button>
+          <Button type="button" variant="contained" color="primary" onClick={handleSaveNext}>
+            Зберегти та наступний
+          </Button>
+        </Box>
+
+        <FormControlLabel
+          control={<Checkbox checked={notify} onChange={(e) => setNotify(e.target.checked)} />}
+          label="Повідомити студента"
+        />
+      </Stack>
+    </Box>
   );
 };
 
