@@ -159,7 +159,7 @@ const GradingPage: React.FC = () => {
         <AssignmentViewer assignmentUrl={assignmentUrl} />
         <div style={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
           {student && <StudentInfo data={student} />}
-          <GradingForm assignmentId={assignmentId} student={student as StudentDetails} />
+          <GradingForm assignmentId={assignmentId} student={student as StudentDetails} onSaveSuccess={handleNext} />
         </div>
       </div>
     </div>

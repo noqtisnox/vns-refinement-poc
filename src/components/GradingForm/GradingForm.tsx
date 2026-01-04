@@ -7,9 +7,10 @@ import axios from "axios";
 type GradingFormProps = {
   assignmentId: string;
   student: StudentDetails;
+  onSaveSuccess?: () => void;
 };
 
-const GradingForm: React.FC<GradingFormProps> = ({ assignmentId, student }) => {
+const GradingForm: React.FC<GradingFormProps> = ({ assignmentId, student, onSaveSuccess }) => {
   const sesskey = "JustAPlaceholderSesskey";
   
   // Real URL would be `https://vns.lpnu.ua/lib/ajax/service.php?sesskey=${sesskey}&info=mod_assign_submit_grading_form`;
@@ -26,14 +27,11 @@ const GradingForm: React.FC<GradingFormProps> = ({ assignmentId, student }) => {
     return `\"id=${assignmentId}&rownum=0&useridlistid=&attemptnumber=-1&ajax=0&userid=0&sendstudentnotifications=${notify}&action=submitgrade&sesskey=${sesskey}&_qf__mod_assign_grade_form_${student.id}=1&grade=${encodedGrade}&assignfeedbackcomments_editor%5Btext%5D=${encodedComment}&assignfeedbackcomments_editor%5Bformat%5D=1&assignfeedbackcomments_editor%5Bitemid%5D=619729955\"`
   }
 
-  const handleSave = (e?: React.FormEvent) => {
+  const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    console.log("Grade Submitted:", grade);
-    console.log("Comment Submitted:", comment);
-    console.log("Notify:", notify);
-
-    axios.post(postURL, [
-      {
+    
+    try {
+      await axios.post(postURL, [{
         "index": 0,
         "methodname": "mod_assign_submit_grading_form",
         "args": {
@@ -41,13 +39,25 @@ const GradingForm: React.FC<GradingFormProps> = ({ assignmentId, student }) => {
           "userid": Number(student.id),
           "jsonformdata": createJSONFormData()
         }
-      }
-    ])
+      }]);
+      
+      // Clear form for the next student
+      setGrade("");
+      setComment("");
+      
+      return true; // Indicate success
+    } catch (error) {
+      console.error("Save failed", error);
+      return false;
+    }
   };
 
-  const handleSaveNext = (e: React.FormEvent) => {
+  const handleSaveNext = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleSave();
+    const success = await handleSave();
+    if (success && onSaveSuccess) {
+      onSaveSuccess();
+    }
   };
 
   return (
