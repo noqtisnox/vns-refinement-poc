@@ -2,6 +2,7 @@ import React from 'react';
 import StudentsTable from '../../components/StudentsTable/StudentsTable';
 import { Button } from '@mui/material';
 
+
 const StudentsTablePage: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const assignmentId = params.get('id') ?? '';
@@ -13,6 +14,7 @@ const StudentsTablePage: React.FC = () => {
                     Назад
                 </Button>
             </div>
+
             <div style={{ padding: '20px' }}>
                 <StudentsTable />
             </div>

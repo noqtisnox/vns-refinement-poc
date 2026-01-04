@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import styles from './AssignmentNavbar.module.css';
+import { TextField, InputAdornment, IconButton, Autocomplete } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
-const AssignmentNavbar: React.FC = () => {
-  const [query, setQuery] = useState('');
+type Props = {
+  searchQuery?: string;
+  setSearchQuery?: (s: string) => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onSearchEnter?: (s: string) => void;
+  suggestions?: { id: string; label: string; email?: string }[];
+};
+
+const AssignmentNavbar: React.FC<Props> = ({ searchQuery, setSearchQuery, onPrev, onNext, onSearchEnter, suggestions }) => {
+  const [localQuery, setLocalQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+
+  const query = searchQuery !== undefined ? searchQuery : localQuery;
 
   return (
     <nav className={styles.bottomNavbar}>
@@ -17,16 +30,67 @@ const AssignmentNavbar: React.FC = () => {
       </div>
 
       <div className={styles.navRight}>
-        <button className={styles.navArrow} aria-label="Previous">◀</button>
+        <button className={styles.navArrow} aria-label="Previous" onClick={onPrev}>◀</button>
 
         <div className={styles.searchGroup}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Перейти до..."
-            className={styles.searchInput}
-          />
+          {suggestions && suggestions.length > 0 ? (
+            <Autocomplete
+              freeSolo
+              options={suggestions || []} // Pass the whole object array
+              getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+              inputValue={query}
+              onInputChange={(_, value) => {
+                if (setSearchQuery) setSearchQuery(value);
+                else setLocalQuery(value);
+              }}
+              onChange={(_, value) => {
+                // value can be a string (from freeSolo) or a suggestion object
+                const val = typeof value === 'string' ? value : value?.label;
+                if (val && onSearchEnter) {
+                  onSearchEnter(val);
+                }
+              }}
+              sx={{ width: 260 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  placeholder="Перейти до..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onSearchEnter?.(query);
+                    }
+                  }}
+                />
+              )}
+            />
+          ) : (
+            <TextField
+              size="small"
+              variant="outlined"
+              value={query}
+              onChange={(e) => {
+                if (setSearchQuery) setSearchQuery(e.target.value);
+                else setLocalQuery(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && typeof onSearchEnter === 'function') {
+                  onSearchEnter((e.target as HTMLInputElement).value);
+                }
+              }}
+              placeholder="Перейти до..."
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton size="small" aria-label="search" onClick={() => onSearchEnter && onSearchEnter(query)}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              className={styles.searchInput}
+            />
+          )}
           <button
             type="button"
             className={styles.filterBtn}
@@ -36,7 +100,7 @@ const AssignmentNavbar: React.FC = () => {
           </button>
         </div>
 
-        <button className={styles.navArrow} aria-label="Next">▶</button>
+        <button className={styles.navArrow} aria-label="Next" onClick={onNext}>▶</button>
       </div>
 
       {isModalOpen && (

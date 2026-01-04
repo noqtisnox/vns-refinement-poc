@@ -126,10 +126,16 @@ if ($info === 'mod_assign_list_participants') {
         'error' => false,
         'data' => $participants
     ];
-} else {
+}
+
+if ($info === 'mod_assign_submit_grading_form') {
+    // Simulate a successful grading submission
     $response[] = [
-        'error' => true,
-        'message' => 'unknown info'
+        'error' => false,
+        'data' => [
+            'status' => 'success',
+            'message' => 'Grade and feedback submitted successfully.'
+        ]
     ];
 }
 

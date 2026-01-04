@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import StudentInfo from '../../components/StudentInfo/StudentInfo';
 import './GradingPage.css';
 import type { StudentDetails } from '../../types/types';
@@ -10,54 +10,156 @@ import AssignmentNavbar from '../../components/AssignmentNavbar/AssignmentNavbar
 const GradingPage: React.FC = () => {
   const params = new URLSearchParams(window.location.search);
   const assignmentId = params.get('id') ?? '';
-  const userId = params.get('userid') ?? '';
-  const nameParam = params.get('name') ?? '';
-  const emailParam = params.get('email') ?? '';
-  const gradeParam = params.get('grade') ?? '';
-  const statusParam = (params.get('status') as
-    | 'none'
-    | 'submitted'
-    | 'late'
-    | 'graded') || 'submitted';
-  const lastUpdatedParam = params.get('lastUpdated') ?? new Date().toLocaleString();
+  const initialUserId = params.get('userid') ?? '';
 
-  // Try to read stored participant data from sessionStorage. This avoids passing extra fields via URL.
-  let storedParticipant: any = null;
-  try {
-    const key = `grading:${assignmentId}:${userId}`;
-    const raw = sessionStorage.getItem(key);
-    if (raw) storedParticipant = JSON.parse(raw);
-  } catch (err) {
-    storedParticipant = null;
-  }
+  const [studentList, setStudentList] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const [student, setStudent] = useState<StudentDetails | null>(null);
 
-  const student: StudentDetails = {
-    id: userId || '0',
-    name: storedParticipant?.fullname || nameParam || 'Unknown Student',
-    email: storedParticipant?.email || emailParam || 'student@example.com',
-    pfpUrl:
-      storedParticipant?.pfpUrl ||
-      params.get('pfpUrl') ||
-      'https://i0.wp.com/newspack-berkeleyside-cityside.s3.amazonaws.com/wp-content/uploads/2018/10/unnamed-1.jpg?resize=780%2C437&ssl=1',
-    submissionStatus: (storedParticipant?.submissionstatus as
-      | 'none'
-      | 'submitted'
-      | 'late'
-      | 'graded') || statusParam,
-    lastUpdated: storedParticipant?.lastUpdated || lastUpdatedParam,
-    currentGrade: String(storedParticipant?.currentgrade ?? (gradeParam || 'N/A')),
+  useEffect(() => {
+    // load stored list for this assignment
+    try {
+      const listKey = `grading:list:${assignmentId}`;
+      const rawList = sessionStorage.getItem(listKey);
+      if (rawList) {
+        const arr = JSON.parse(rawList);
+        if (Array.isArray(arr)) setStudentList(arr);
+      }
+    } catch (e) {
+      // ignore
+    }
+    // if no stored list found, try loading participants.json as a fallback
+    (async () => {
+      try {
+        const listKey = `grading:list:${assignmentId}`;
+        const rawList = sessionStorage.getItem(listKey);
+        if (!rawList) {
+          const res = await fetch('/data/participants.json');
+          if (!res.ok) return;
+          const json = await res.json();
+          const data = Array.isArray(json) && json.length > 0 && json[0].data ? json[0].data : [];
+          if (Array.isArray(data) && data.length > 0) setStudentList(data as any[]);
+        }
+      } catch (err) {
+        // ignore
+      }
+    })();
+  }, [assignmentId]);
+
+  const loadStudentFromStorage = useCallback((userId: string) => {
+    const params = new URLSearchParams(window.location.search);
+    const assignmentIdLocal = params.get('id') ?? assignmentId;
+    try {
+      const key = `grading:${assignmentIdLocal}:${userId}`;
+      const raw = sessionStorage.getItem(key);
+      if (raw) {
+        const stored = JSON.parse(raw);
+        return stored;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  }, [assignmentId]);
+
+  useEffect(() => {
+    // determine initial student either from stored list or from session storage key
+    let initialStudent: any = null;
+    if (studentList.length > 0 && initialUserId) {
+      const idx = studentList.findIndex((s) => String(s.id) === String(initialUserId));
+      if (idx >= 0) {
+        setCurrentIndex(idx);
+        initialStudent = studentList[idx];
+      }
+    }
+
+    if (!initialStudent && initialUserId) {
+      initialStudent = loadStudentFromStorage(initialUserId) || null;
+    }
+
+    if (initialStudent) {
+      setStudent({
+        id: String(initialStudent.id),
+        name: initialStudent.fullname || initialStudent.name || initialStudent.username || 'Unknown Student',
+        email: initialStudent.email || 'student@example.com',
+        pfpUrl: initialStudent.pfpUrl || initialStudent.picture || '',
+        submissionStatus: initialStudent.submissionstatus || 'submitted',
+        lastUpdated: initialStudent.lastUpdated || new Date().toLocaleString(),
+        currentGrade: String(initialStudent.currentgrade ?? 'N/A'),
+      });
+    }
+  }, [studentList, initialUserId, loadStudentFromStorage]);
+
+  const goToIndex = (idx: number) => {
+    if (!studentList || idx < 0 || idx >= studentList.length) return;
+    selectAndShow(studentList, idx);
+  };
+
+  const selectAndShow = (list: any[], idx: number) => {
+    if (!Array.isArray(list) || idx < 0 || idx >= list.length) return;
+    const s = list[idx];
+    const userId = String(s.id);
+    try {
+      const key = `grading:${assignmentId}:${userId}`;
+      sessionStorage.setItem(key, JSON.stringify(s));
+    } catch (e) {
+      // ignore
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.set('userid', userId);
+    window.history.replaceState({}, '', url.toString());
+    setStudentList(list);
+    setCurrentIndex(idx);
+    setStudent({
+      id: userId,
+      name: s.fullname || s.name || s.username || 'Unknown Student',
+      email: s.email || 'student@example.com',
+      pfpUrl: s.pfpUrl || s.picture || '',
+      submissionStatus: s.submissionstatus || 'submitted',
+      lastUpdated: s.lastUpdated || new Date().toLocaleString(),
+      currentGrade: String(s.currentgrade ?? 'N/A'),
+    });
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) goToIndex(currentIndex - 1);
+  };
+
+  const handleNext = () => {
+    if (currentIndex < studentList.length - 1) goToIndex(currentIndex + 1);
   };
 
   const assignmentUrl = testPdf;
 
+  const handleSearchEnter = (q: string) => {
+    const ql = q.trim().toLowerCase();
+    if (!ql) return;
+    const idx = studentList.findIndex((s) => {
+      const idStr = String(s.id || '');
+      const fullname = String(s.fullname || s.name || s.username || '').toLowerCase();
+      const email = String(s.email || '').toLowerCase();
+      return idStr === ql || fullname.includes(ql) || email.includes(ql);
+    });
+    if (idx >= 0) goToIndex(idx);
+  };
+
+  const suggestions = studentList.map((s) => ({ id: String(s.id), label: s.fullname || s.name || s.username || String(s.id), email: s.email }));
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', }}>
-      <AssignmentNavbar />
+      <AssignmentNavbar
+        searchQuery={undefined}
+        setSearchQuery={undefined}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onSearchEnter={handleSearchEnter}
+        suggestions={suggestions}
+      />
       <div style={{ flex: 1, display: 'flex', justifyContent: 'space-evenly' }}>
         <AssignmentViewer assignmentUrl={assignmentUrl} />
         <div style={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-          <StudentInfo data={student} />
-          <GradingForm />
+          {student && <StudentInfo data={student} />}
+          <GradingForm assignmentId={assignmentId} student={student as StudentDetails} />
         </div>
       </div>
     </div>

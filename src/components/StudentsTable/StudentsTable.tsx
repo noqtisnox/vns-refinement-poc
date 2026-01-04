@@ -43,7 +43,18 @@ type Participant = {
   comment?: string | null;
 };
 
-const StudentsTable: React.FC = () => {
+type Controls = {
+  prev: () => void;
+  next: () => void;
+  findAndNavigate: (query: string) => void;
+};
+
+type Props = {
+  searchQuery?: string;
+  onRegisterControls?: (c: Controls) => void;
+};
+
+const StudentsTable: React.FC<Props> = ({ searchQuery = '', onRegisterControls }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -97,6 +108,14 @@ const StudentsTable: React.FC = () => {
               // store the full participant object for the grading page to read
               try {
                 sessionStorage.setItem(key, JSON.stringify(row.original));
+                // also store the current visible list so grader can navigate sequentially
+                try {
+                  const rows = table.getRowModel().rows;
+                  const listKey = `grading:list:${assignmentId}`;
+                  sessionStorage.setItem(listKey, JSON.stringify(rows.map((r) => r.original)));
+                } catch (e) {
+                  // ignore
+                }
               } catch (e) {
                 // ignore storage errors
                 // eslint-disable-next-line no-console
@@ -193,6 +212,69 @@ const StudentsTable: React.FC = () => {
     paginationDisplayMode: 'pages',
   });
 
+  React.useEffect(() => {
+    if (!table) return;
+    // sync external search query into MRT global filter
+    // @ts-ignore
+    if (typeof table.setGlobalFilter === 'function') table.setGlobalFilter(searchQuery);
+  }, [searchQuery, table]);
+
+  React.useEffect(() => {
+    if (!onRegisterControls) return;
+    const controls: Controls = {
+      prev: () => {
+        const rows = table.getRowModel().rows;
+        if (!rows || rows.length === 0) return;
+        // navigate to previous of first visible (simple behavior)
+        const target = rows[0];
+        if (!target) return;
+        const participant = target.original as Participant;
+        const params = new URLSearchParams(window.location.search);
+        const assignmentId = params.get('id') ?? '0';
+        const key = `grading:${assignmentId}:${participant.id}`;
+        try { sessionStorage.setItem(key, JSON.stringify(participant)); } catch (e) { console.error('sessionStorage setItem failed', e); }
+        const url = `http://localhost:8000/mod/assign/view.php?id=${assignmentId}&action=grader&userid=${participant.id}`;
+        window.location.href = url;
+      },
+      next: () => {
+        const rows = table.getRowModel().rows;
+        if (!rows || rows.length === 0) return;
+        const target = rows[0];
+        if (!target) return;
+        const participant = target.original as Participant;
+        const params = new URLSearchParams(window.location.search);
+        const assignmentId = params.get('id') ?? '0';
+        const key = `grading:${assignmentId}:${participant.id}`;
+        try { sessionStorage.setItem(key, JSON.stringify(participant)); } catch (e) { console.error('sessionStorage setItem failed', e); }
+        const url = `http://localhost:8000/mod/assign/view.php?id=${assignmentId}&action=grader&userid=${participant.id}`;
+        window.location.href = url;
+      },
+      findAndNavigate: (q: string) => {
+        const rows = table.getRowModel().rows;
+        if (!rows || rows.length === 0) return;
+        const ql = q.trim().toLowerCase();
+        if (!ql) return;
+        const found = rows.find((r) => {
+          const p = r.original as Participant;
+          const fullname = String(p.fullname || '').toLowerCase();
+          const email = String(p.email || '').toLowerCase();
+          return fullname.includes(ql) || email.includes(ql) || String(p.id) === ql;
+        });
+        if (!found) return;
+        const participant = found.original as Participant;
+        const params = new URLSearchParams(window.location.search);
+        const assignmentId = params.get('id') ?? '0';
+        const listKey = `grading:list:${assignmentId}`;
+        try { sessionStorage.setItem(listKey, JSON.stringify(rows.map((r) => r.original))); } catch (e) { /* ignore */ }
+        const key = `grading:${assignmentId}:${participant.id}`;
+        try { sessionStorage.setItem(key, JSON.stringify(participant)); } catch (e) { /* ignore */ }
+        const url = `http://localhost:8000/mod/assign/view.php?id=${assignmentId}&action=grader&userid=${participant.id}`;
+        window.location.href = url;
+      },
+    };
+    onRegisterControls(controls);
+  }, [onRegisterControls, table]);
+
   return (
     <Stack sx={{ m: '2rem 0' }}>
       <Typography variant="h4">Подання</Typography>
@@ -214,6 +296,10 @@ const StudentsTable: React.FC = () => {
                   const key = `grading:${assignmentId}:${userId}`;
                   try {
                     sessionStorage.setItem(key, JSON.stringify(first));
+                    // also store the current visible list so grader can navigate sequentially
+                    const listKey = `grading:list:${assignmentId}`;
+                    const list = rows.map((r) => r.original);
+                    sessionStorage.setItem(listKey, JSON.stringify(list));
                   } catch (e) {
                     // ignore storage errors
                     // eslint-disable-next-line no-console
