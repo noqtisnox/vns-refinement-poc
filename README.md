@@ -1,73 +1,84 @@
-# React + TypeScript + Vite
+# VNS Refinement POC
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains a Proof of Concept (POC) for refining the assignment management and grading interface for the "VNS" platform (Moodle-based system). It features a modern, responsive frontend built with React, TypeScript, and Material UI.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The project is designed to integrate into a PHP-based environment (/mod/assign/) while providing a high-performance, interactive experience for instructors. It includes two primary views:
 
-## React Compiler
+1. **Students Table Page:** A comprehensive dashboard to view, filter, and search through student assignment submissions.
+2. **Grading Page:** A split-view interface allowing instructors to view submitted PDFs side-by-side with a grading form and student information.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **Interactive Student Dashboard:** Uses material-react-table for advanced filtering (by group, status, submission date), global search, and pagination.
+- **Split-Screen Grading:** Integrated PDF viewer allowing immediate review of student work without leaving the page.
+- **Comprehensive Grading Form:** Support for numeric grades, text feedback, and automated student notifications.
+- **Dynamic Routing:** Handles view switching via URL parameters (action=grading or action=grader) within a unified PHP entry point.
+- **PHP Service Integration:** Includes a backend mock (service.php) that demonstrates how to serve participant data to the React frontend.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Technologies Used
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Frontend: React 19, TypeScript, Vite
+- UI Framework: Material UI (MUI) 7
+- Tables: Material React Table (MRT)
+- Styling: CSS Modules and Emotion
+- Backend Support: PHP (for Moodle module integration)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+
+- Node.js (latest LTS recommended)
+- npm
+- A local PHP server (like XAMPP or Docker) to run the mod/ directory
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/noqtisnox/vns-refinement-poc.git
+   cd vns-refinement-poc
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+### Build & Deploy
+
+The project is configured to build directly into the PHP module structure:
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This will output the production assets to ./mod/assign/dist, which are then linked by view.php.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Running All Together
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+To run the application locally, follow these steps:
+
+1. Ensure you have a local PHP server running.
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+3. Access the application in your browser at `http://localhost:3000`.
+
+### Running All Together
+
+To run the application locally, follow these steps from the root directory:
+
+1. Start the frontend:
+   ```bash
+   npm run build --watch
+   ```
+2. Start the backend:
+   ```bash
+   php -S localhost:8000 -t .
+   ```
+3. Access the application in your browser at `localhost:8000/mod/assign/view.php?id=12345&action=grading`.
