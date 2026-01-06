@@ -19,7 +19,6 @@ const AssignmentViewer: React.FC<Props> = ({ assignmentUrl }) => {
   }
 
   return (
-    // 2. Main Viewer Container Styling
     <div className='viewer__container'>
       <div 
         className='pdf-display-area'

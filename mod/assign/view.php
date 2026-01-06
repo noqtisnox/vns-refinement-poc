@@ -9,7 +9,7 @@
 <body>
     <?php
         $id     = $_GET['id'] ?? null;
-        $action = $_GET['action'] ?? 'grading'; // Default to table
+        $action = $_GET['action'] ?? 'grading';
         $userId = $_GET['userid'] ?? null;
     ?>
     <div id="root" 
